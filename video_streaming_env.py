@@ -73,25 +73,3 @@ class VideoStreamingEnv(gym.Env):
         
         return self.state, reward, done, False, {"rebuffer": rebuffer_time}
 
-
-if __name__ == "__main__":
-    env = VideoStreamingEnv()
-    obs, _ = env.reset()
-    total_reward = 0
-    
-    print("--- STARTING SIMULATION ---")
-    for _ in range(10):
-        # Pick a random action (0, 1, or 2)
-        action = env.action_space.sample()
-        obs, reward, done, _, info = env.step(action)
-        
-        # Print what happened
-        speed = f"{obs[0]:.0f}kbps"
-        buf = f"{obs[1]:.1f}s"
-        qual = ["Low", "Med", "High"][int(obs[2])]
-        print(f"Action: {qual} | Speed: {speed} | Buffer: {buf} | Rebuffer: {info['rebuffer']:.2f}s | Reward: {reward:.2f}")
-
-        total_reward += reward
-        if done: break
-        
-    print(f"Total Reward: {total_reward:.2f}")
