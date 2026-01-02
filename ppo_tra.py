@@ -5,10 +5,10 @@ import os
 
 
 env = VideoStreamingEnv()
-model = PPO("MlpPolicy", env, verbose=1)
-model.learn(total_timesteps=10000)
+model =PPO.load("ppo_video_streamerrrr", env=env) if os.path.exists("ppo_video_streamerrrr.zip") else PPO("MlpPolicy", env, verbose=1)
+model.learn(total_timesteps=20000,progress_bar=True)
 print("--- TRAINING FINISHED ---")
-model.save("ppo_video_streamer")
+model.save("ppo_video_streamer_2")
 
 
 print("\n--- TESTING THE NEW BRAIN ---")

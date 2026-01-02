@@ -7,11 +7,11 @@ class VideoStreamingEnv(gym.Env):
     def __init__(self):
         super(VideoStreamingEnv, self).__init__()
         
-        # --- CONFIGURATION ---
+        
         self.CHUNK_DURATION = 4.0   # Each video chunk is 4 seconds
         self.BITRATES = [500, 1000, 2000] # Bitrates for Low(0), Med(1), High(2) in kbps
         
-        # ACTIONS: 0=Low, 1=Medium, 2=High
+        # ACTIONS: 0=Low, 1=Medium, 2=High (the prediction quality level)
         self.action_space = spaces.Discrete(3)
         
         # OBSERVATION: [Network Speed (kbps), Buffer Level (seconds), Last Quality (0-2)]
@@ -21,7 +21,7 @@ class VideoStreamingEnv(gym.Env):
             dtype=np.float32
         )
         
-        # Initial State
+        # Initial State for the environmentt to start with 
         self.state = np.array([1000, 10, 0], dtype=np.float32) # Start: 1000kbps, 10s buffer, Low Qual
         self.chunks_left = 50 # Video length
 
@@ -31,12 +31,12 @@ class VideoStreamingEnv(gym.Env):
         return self.state, {}
 
     def step(self, action):
-        # 1. GET CURRENT STATE
+        # 1. GET CURRENT STATE  for  the state PREDICTIONS
         prev_speed = self.state[0]
         prev_buffer = self.state[1]
         
         # 2. SIMULATE NETWORK CHANGE (Random fluctuation for now)
-        # Network speed fluctuates by +/- 20%
+        # Network speed fluctuates by +/- 20%(simulated env for the trainign and reward calc)
         new_speed = prev_speed * random.uniform(0.8, 1.2)
         
         # 3. CALCULATE DOWNLOAD
@@ -57,7 +57,7 @@ class VideoStreamingEnv(gym.Env):
         new_buffer = min(60, new_buffer)
 
         # 5. CALCULATE REWARD
-        # Reward = Quality - (Penalty * Rebuffer) - (Penalty * Smoothness)
+        # Reward = Quality - (Penalty * Rebuffer) - (Penalty * Smoothness)(IMPORTANT for ABR so that the quality doesnt change too much)
         reward = (chosen_bitrate / 1000) - (4.0 * rebuffer_time) 
         
         # Penalty for changing quality too abruptly
@@ -65,7 +65,7 @@ class VideoStreamingEnv(gym.Env):
         if abs(action - last_quality) > 1:
             reward -= 0.5 
 
-        # 6. UPDATE STATE
+        # 6. UPDATE STATE(so that the next step can use it) AND CHECK IF DONE
         self.state = np.array([new_speed, new_buffer, action], dtype=np.float32)
         self.chunks_left -= 1
         
