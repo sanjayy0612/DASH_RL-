@@ -4,7 +4,7 @@
 
 An end-to-end video streaming system that uses **Deep Reinforcement Learning (PPO)** to optimize video quality in real-time. The AI agent balances high resolution against buffering risks by observing network speed and buffer health, outperforming static rule-based algorithms.
 
-![Project Demo](https://via.placeholder.com/800x400?text=Insert+Screenshot+of+Player+Here)
+
 
 ##  About
 
