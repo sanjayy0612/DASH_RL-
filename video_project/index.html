@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Adaptive Streaming Player</title>
+    <script src="https://cdn.dashjs.org/v4.7.4/dash.all.min.js"></script>
+    <style>
+        body { background-color: #1a1a1a; color: white; font-family: monospace; text-align: center; margin-top: 30px; }
+        video { width: 80%; max-width: 800px; border: 3px solid #00d4ff; box-shadow: 0 0 20px rgba(0,212,255,0.2); }
+        .stats-box { background: #333; display: inline-block; padding: 20px; margin-top: 20px; border-radius: 10px; text-align: left; min-width: 300px;}
+        h1 { color: #00d4ff; }
+        .highlight { color: #00ff00; font-weight: bold; }
+        .error { color: #ff4444; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h1>AI-Powered Adaptive Bitrate Player</h1>
+    
+    <video id="videoPlayer" controls></video>
+
+    <br>
+
+    <div class="stats-box">
+        <p>Network Speed: <span id="speed" class="highlight">0</span> kbps</p>
+        <p>Buffer Level: <span id="buffer" class="highlight">0</span> seconds</p>
+        <p>Current Quality: <span id="quality">Loading...</span></p>
+        <hr>
+        <p>🤖 AI Decision: <span id="ai_decision" style="color: yellow;">Waiting...</span></p>
+        <p id="error_log" class="error"></p>
+    </div>
+
+    <script>
+        var url = "/manifest.mpd"; 
+        var player = dashjs.MediaPlayer().create();
+        var videoView = document.querySelector("#videoPlayer");
+
+        // 1. Initialize Player
+        player.initialize(videoView, url, true);
+
+        // 2. Loop the Video
+        player.on(dashjs.MediaPlayer.events.PLAYBACK_ENDED, function() {
+            player.seek(0);
+            player.play();
+        });
+
+        // 3. Disable Auto-Rules (Let AI take over)
+        player.updateSettings({
+            'streaming': { 'abr': { 'useDefaultABRRules': false } }
+        });
+
+        // 4. The Loop
+        setInterval(async function() {
+            try {
+                // Get Stats
+                var bufferLength = player.getBufferLength('video');
+                var bandwidth = player.getAverageThroughput('video'); 
+                
+                // SAFE QUALITY CHECK: Use '0' if function is missing
+                var currentQuality = 0;
+                if (player.getQualityFor) {
+                    currentQuality = player.getQualityFor('video');
+                }
+
+                if (!bandwidth || isNaN(bandwidth)) bandwidth = 0;
+
+                // Update UI
+                document.getElementById('speed').innerText = Math.floor(bandwidth);
+                document.getElementById('buffer').innerText = bufferLength.toFixed(2);
+                document.getElementById('quality').innerText = currentQuality;
+
+                // Send to AI
+                let response = await fetch('http://127.0.0.1:5001/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        speed: bandwidth, 
+                        buffer: bufferLength, 
+                        last_quality: currentQuality 
+                    })
+                });
+
+                if (!response.ok) throw new Error("Server Error: " + response.status);
+
+                let result = await response.json();
+                
+                // Show Result
+                let qualityNames = ["Low (360p)", "Medium", "High (720p)"];
+                document.getElementById('ai_decision').innerText = qualityNames[result.quality];
+                document.getElementById('ai_decision').style.color = "#00ff00";
+                document.getElementById('error_log').innerText = ""; // Clear errors
+
+                // Apply Action
+                if (player.setQualityFor) {
+                    player.setQualityFor('video', result.quality);
+                }
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById('ai_decision').innerText = "CONNECTION FAILED";
+                document.getElementById('ai_decision').style.color = "red";
+                document.getElementById('error_log').innerText = err.message;
+            }
+
+        }, 1000); 
+    </script>
+</body>
+</html>

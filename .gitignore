@@ -1,11 +1,23 @@
-# virtual env
-dash/
-venv/
-
-# python cache
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+venv/
+env/
+dash/
+.env
 
-# trained models
-*.zip
-models/
+# Model Files (Optional: Keep .zip if small, ignore if huge)
+# *.zip 
+
+# Video Data (Don't upload 200MB of video chunks!)
+video_project/*.m4s
+video_project/*.mp4
+video_project/ffmpeg
+
+# Mac System Files
+.DS_Store
+
+# IDEs
+.vscode/
+.idea/
