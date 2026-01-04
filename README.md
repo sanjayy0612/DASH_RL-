@@ -1,4 +1,4 @@
-# NeuralStream: AI-Powered Adaptive Bitrate Streaming
+# NeuralStream: -Adaptive Bitrate Streaming
 
 
 
