@@ -1,0 +1,8 @@
+{
+  "episode_length": 50,
+  "chunk_duration_seconds": 4.0,
+  "bitrates_kbps": [500, 1000, 2000],
+  "initial_bandwidth_kbps": 1000.0,
+  "initial_buffer_seconds": 10.0,
+  "max_buffer_seconds": 60.0
+}
