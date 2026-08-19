@@ -7,8 +7,16 @@ env/
 dash/
 .env
 
-# Model Files (Optional: Keep .zip if small, ignore if huge)
-# *.zip 
+# Generated experiment artifacts and model checkpoints. Historical tracked
+# checkpoints remain in Git until a separate archival decision is made.
+artifacts/
+models/
+checkpoints/
+*.zip
+*.pt
+*.pth
+*.ckpt
+*.log
 
 # Video Data (Don't upload 200MB of video chunks!)
 video_project/*.m4s
@@ -21,3 +29,4 @@ video_project/ffmpeg
 # IDEs
 .vscode/
 .idea/
+latency_meteric_check.md
